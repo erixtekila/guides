@@ -76,13 +76,13 @@ var Marionette = require('backbone.marionette');
 
 var ToDo = Marionette.LayoutView.extend({
   tagName: 'li',
-  template: './templates/todoitem.html'
+  template: require( './templates/todoitem.html' )
 });
 
 
 var TodoList = Marionette.CompositeView.extend({  
   el: '#app-hook',
-  template: require('./templates/todolist.html'),
+  template: require( './templates/todolist.html' ),
 
   childView: ToDo,
   childViewContainer: 'ul',
@@ -101,13 +101,6 @@ var TodoList = Marionette.CompositeView.extend({
     add: 'itemAdded'
   },
 
-  initialize: function() {
-    this.collection = new Backbone.Collection([
-      {assignee: 'Scott', text: 'Write a book about Marionette'},
-      {assignee: 'Andrew': text: 'Do some coding'}
-    ]);
-  },
-
   onAddTodoItem: function() {  // 4
     this.collection.add({
       assignee: this.ui.assignee.val(),  // 5
@@ -121,7 +114,16 @@ var TodoList = Marionette.CompositeView.extend({
   }
 });
 
-var todo = new TodoList();
+var todo = new TodoList
+(
+  {
+    collection : new Backbone.Collection
+    ([
+      {assignee: 'Scott', text: 'Write a book about Marionette'},
+      {assignee: 'Andrew', text: 'Do some coding'}
+    ])
+  }
+);
 todo.render();
 ```
 
@@ -221,37 +223,41 @@ var TodoList = Marionette.CompositeView.extend({
   collectionEvents: {
     add: 'itemAdded'
   },
-
-  initialize: function() {
-    this.collection = new Backbone.Collection([
-      {assignee: 'Scott', text: 'Write a book about Marionette'},
-      {assignee: 'Andrew', text: 'Do some coding'}
-    ]);
-    this.model = new ToDoModel();
+  modelEvents :
+  {
+    change : 'modelChanged'
   },
-
   onAddTodoItem: function() {
     this.model.set({
       assignee: this.ui.assignee.val(),
       text: this.ui.text.val()
     }, {validate: true});
-
+  },
+  modelChanged : function()
+  {
     var items = this.model.pick('assignee', 'text');
-    this.collection.add(items);
+    this.collection.add( items );
   },
 
   itemAdded: function() {
-    this.model.set({
-      assignee: '',
-      text: ''
-    });
-
     this.ui.assignee.val('');
     this.ui.text.val('');
   }
 });
 
-var todo = new TodoList();
+var todo = new TodoList
+(
+  {
+    model : new ToDoModel()
+    , collection : new Backbone.Collection
+    (
+      [
+        {assignee: 'Scott', text: 'Write a book about Marionette'},
+        {assignee: 'Andrew', text: 'Do some coding'}
+      ]
+    )
+  }
+);
 todo.render();
 ```
 
@@ -262,6 +268,8 @@ Vous pouvez maintenant voir comment nous avons supprimer dans les champs de notr
 
 
 ## Rendu depuis les modèles
+
+> **fixme** model reset launch a change event and add a new item to the list !
 
 Révisant notre premier chapitre, nous étions capable d'afficher les données des champs d'un modèle. Nous utiliserons cela pour gérer notre formulaire également.
 Tout d'abord, ouvrons notre _template_ `todolist.html` :
@@ -278,7 +286,7 @@ Tout d'abord, ouvrons notre _template_ `todolist.html` :
 </form>
 ```
 
-En ajoutant les champs du modèle à notre formulaire, nous seront aptes à restituer les données directement deouis notre modèle. Cela signifie aussi que, lorsque les champs sont vides, ils ne contiendront pas de valeur.
+En ajoutant les champs du modèle à notre formulaire, nous seront aptes à restituer les données directement depuis notre modèle. Cela signifie aussi que, lorsque les champs sont vides, ils ne contiendront pas de valeur.
 Nous avons juste besoin de relier cela à notre vue :
 
 ```js
@@ -351,7 +359,7 @@ var todo = new TodoList();
 todo.render();
 ```
 
-Avec ces changements, le formulaire va se reinitialisé tout seul dès que l'utilisateur acrtive le bouton  "Add Item".
+Avec ces changements, le formulaire va se reinitialiser tout seul dès que l'utilisateur acrtive le bouton  "Add Item".
 Toutefois, il y a une dernière chose à noter - la méthode `render` redesssine la totalité de la liste aussi. Vous pouvez probablement imaginer que cela va vite devenir un goulet d'étranglement, plus la liste grossira. Idéalement, nous souhaitons juste redessiné le formulaire et la liste séparement. Nous verrons cela au prochain chapitre.
 
 
