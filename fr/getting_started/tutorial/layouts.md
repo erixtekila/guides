@@ -1,4 +1,4 @@
-# Applications and regions
+# Applications et regions
 
 In the previous chapter we built our ToDo list application with the ability to
 add new jobs to our list. So far, everything has been built into a single

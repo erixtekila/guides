@@ -26,7 +26,7 @@ npm init
 Suivez les étapes de la ligne de commande.
 - Installez _browserify_ depuis le `package.json`
 ```sh
-npm install --savedev browserify
+npm install --save-dev browserify
 ```
 - Installez les libraries depuis le `package.json`
 ```sh

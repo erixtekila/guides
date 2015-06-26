@@ -112,7 +112,7 @@ var Marionette = require('backbone.marionette');
 
 var ToDo = Marionette.LayoutView.extend({
   tagName: 'li',
-  template: './templates/todoitem.html'
+  template: require( './templates/todoitem.html' )
 });
 
 
