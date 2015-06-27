@@ -11,19 +11,28 @@ isn't the only way.
 `driver.js`:
 
 ```js
+// Explose underscore globally
+_ = require( "underscore" );
+
+var Backbone = require( "Backbone" );
 var Marionette = require('backbone.marionette');
 var TodoView = require('./views/layout');
+var ToDoModel = require('./models/todo');
 
-var initialData = {
-  items: [
+var initialData = [
     {assignee: 'Scott', text: 'Write a book about Marionette'},
-    {assignee: 'Andrew': text: 'Do some coding'}
-  ]
-};
+    {assignee: 'Andrew', text: 'Do some coding'}
+  ];
 
-var App = new Marionette.Application({
+var app = new Marionette.Application({
   onStart: function(options) {
-    var todo = new TodoView(options);
+    var todo = new TodoView
+    (
+	    {
+	    	collection : new Backbone.Collection( options.initialData )
+	    	,model : new ToDoModel()
+	    }
+    );
     todo.render();
     todo.triggerMethod('show');
   }
@@ -41,7 +50,6 @@ Everything in this section is contained in the `views/` directory.
 ```js
 var Backbone = require('backbone');
 var Marionette = require('backbone.marionette');
-var ToDoModel = require('../models/todo');
 
 var FormView = require('./form');
 var ListView = require('./list');
@@ -59,32 +67,31 @@ var Layout = Marionette.LayoutView.extend({
 
   collectionEvents: {
     add: 'itemAdded'
-  },
+  }
 
-  initialize: function() {
-    this.collection = new Backbone.Collection([
-      {assignee: 'Scott', text: 'Write a book about Marionette'},
-      {assignee: 'Andrew': text: 'Do some coding'}
-    ]);
-    this.model = new ToDoModel();
-  },
-
-  onShow: function() {
-    var formView = new FormView({model: this.model});
+  ,onShow: function() {
+    this.formView = new FormView({model: this.model});
     var listView = new ListView({collection: this.collection});
 
-    this.showChildView('form', formView);
+    this.showChildView('form', this.formView);
     this.showChildView('list', listView);
   },
 
   onChildviewAddTodoItem: function() {
-    this.model.set({
-      assignee: this.ui.assignee.val(),
-      text: this.ui.text.val()
-    }, {validate: true});
+    var result = this.model.set({
+      assignee: this.formView.ui.assignee.val(),
+      text: this.formView.ui.text.val()
+    },
+    {
+      validate: true
+    });
 
-    var items = this.model.pick('assignee', 'text');
-    this.collection.add(items);
+    // Validation résussie
+    if( result )
+    {
+      var items = this.model.pick('assignee', 'text');
+      this.collection.add(items);
+    }
   },
 
   itemAdded: function() {
@@ -93,7 +100,9 @@ var Layout = Marionette.LayoutView.extend({
       text: ''
     });
   }
-})
+});
+
+module.exports = Layout;
 ```
 
 `form.js`:
@@ -133,7 +142,7 @@ var Marionette = require('backbone.marionette');
 
 var ToDo = Marionette.LayoutView.extend({
   tagName: 'li',
-  template: '../templates/todoitem.html'
+  template: require('../templates/todoitem.html')
 });
 
 
@@ -171,7 +180,7 @@ Everything here is stored in the `templates` directory.
 `todoitem.html`:
 
 ```html
-<%- item.text %> &mdash; <%- item.assignee %>
+<%- text %> &mdash; <%- assignee %>
 ```
 
 ## Models
